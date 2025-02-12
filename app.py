@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, flash
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_mail import Mail, Message
 
 app = Flask(__name__)
@@ -37,6 +37,11 @@ def boka_barnvakt():
             return jsonify({"message": "Ett fel uppstod vid skickandet av din bokning. Försök igen!"}), 500
 
     return render_template('boka-barnvakt.html')
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static/favicon', 'favicon-32x32.png', mimetype='image/png')
 
 
 @app.route('/')

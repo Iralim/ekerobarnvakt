@@ -1,13 +1,30 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, request, render_template, jsonify, send_from_directory
 from flask_mail import Mail, Message
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from database import add_rate_limit, is_ip_blocked
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
+
 mail = Mail(app)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+@app.before_request
+def check_blocked_ip():
+    if is_ip_blocked(get_remote_address()):
+        return jsonify({"error": "Your IP has been blocked due to suspicious activity."}), 403
 
 @app.route('/boka-barnvakt/', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def boka_barnvakt():
+    ip = get_remote_address()
+
     if request.method == 'POST':
         name = request.form.get('name')
         phone = request.form.get('phone')
@@ -15,7 +32,7 @@ def boka_barnvakt():
         description = request.form.get('description')
 
         if not name or not phone or not email:
-            return jsonify({"message": "Alla fält måste fyllas i!"}), 400  # Возвращаем JSON-ошибку
+            return jsonify({"message": "Alla fält måste fyllas i!"}), 400  
 
         subject = f"Ny bokning från {name}"
         body = f"""
@@ -31,18 +48,17 @@ def boka_barnvakt():
 
         try:
             mail.send(msg)
-            return jsonify({"message": "Din bokning har skickats!"})  # JSON-ответ для JS
+            add_rate_limit(ip, 5)  
+            return jsonify({"message": "Din bokning har skickats!"})  
         except Exception as e:
             print(f"Error: {e}")
             return jsonify({"message": "Ett fel uppstod vid skickandet av din bokning. Försök igen!"}), 500
 
     return render_template('boka-barnvakt.html')
 
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory('static/favicon', 'favicon-32x32.png', mimetype='image/png')
-
 
 @app.route('/')
 def hem():
@@ -55,7 +71,7 @@ def tjanster():
 @app.route('/ansokan/')
 def ansokan():
     return render_template('ansokan.html')
-    
+
 @app.route('/kvalite-och-sakerhet/')
 def kvalite_och_sakerhet():
     return render_template('kvalite-och-sakerhet.html')
@@ -72,7 +88,5 @@ def test():
 def om_oss():
     return render_template('om-oss.html')
 
-
 if __name__ == '__main__':
-    app.secret_key = "supersecretkey"  # Для flash-сообщений
     app.run(debug=True)

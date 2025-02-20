@@ -616,41 +616,54 @@
 			if (window.RS_MODULES.checkMinimal!==undefined) { window.RS_MODULES.checkMinimal();};
 		</script>
 		<script id="ocvars">var ocSiteMeta = {plugins: {"a3e4aa5d9179da09d8af9b6802f861a8": 1,"2c9812363c3c947e61f043af3c9852d0": 1,"b904efd4c2b650207df23db3e5b40c86": 1,"a3fe9dc9824eccbd72b7e5263258ab2c": 1}}</script>
-		<script>document.addEventListener("DOMContentLoaded", function () {
-			const form = document.getElementById("orderForm");
-			const responseMessage = document.getElementById("responseMessage");
-			
-			form.addEventListener("submit", function (event) {
-			    event.preventDefault(); // Останавливаем стандартную отправку формы
-			
-			    const formData = new FormData(form);
-			
-			    fetch("{{ url_for('boka_barnvakt') }}", {
-			        method: "POST",
-			        body: formData
-			    })
-			    .then(response => response.json())
-			    .then(data => {
-			        responseMessage.style.display = "block";
-			        responseMessage.style.fontFamily = "'Lato', sans-serif";
-			        responseMessage.style.fontWeight = "400";
-			        responseMessage.style.fontSize = "15px";
-			        responseMessage.style.lineHeight = "23px";
-			        responseMessage.style.color = "var(--color-content-text)";
-			        responseMessage.style.boxSizing = "border-box";
-			        responseMessage.style.margin = "2em 0.5em 1em";
-			        responseMessage.style.padding = "0.2em 1em";
-			        responseMessage.style.border = "2px solid #00a0d2";
-			        responseMessage.style.borderColor = "#46b450";
-			        responseMessage.textContent = "Tack, ditt meddelande har skickats.";
-			        form.reset(); // Очищаем форму после успешной отправки
-			    })
-			    .catch(error => {
-			        responseMessage.style.display = "block";
-			        responseMessage.style.borderColor = "red";
-			        responseMessage.textContent = "Ett fel uppstod. Försök igen!";
-			    });
-			});
+		<script>
+				document.addEventListener("DOMContentLoaded", function () {
+				const form = document.getElementById("orderForm");
+				const responseMessage = document.getElementById("responseMessage");
+
+				form.addEventListener("submit", function (event) {
+					event.preventDefault(); 
+
+					const recaptchaResponse = document.querySelector("textarea[name='g-recaptcha-response']")?.value;
+
+					if (!recaptchaResponse) {
+						responseMessage.style.display = "block";
+						responseMessage.style.borderColor = "red";
+						responseMessage.textContent = "Bekräfta att du inte är en robot!";
+						return;
+					}
+
+					const formData = new FormData(form);
+					formData.append("g-recaptcha-response", recaptchaResponse); 
+
+					fetch("{{ url_for('boka_barnvakt') }}", {
+						method: "POST",
+						body: formData
+					})
+					.then(response => response.json())
+					.then(data => {
+						responseMessage.style.display = "block";
+						responseMessage.style.border = "3px solid red";
+						responseMessage.style.textAlign = "center";
+						responseMessage.style.padding = "3px";
+						responseMessage.style.color = "red";
+						responseMessage.style.fontSize = "18px";
+						if(data.message == 'Din bokning har skickats!') {
+							responseMessage.style.border = "3px solid green";
+							responseMessage.style.color = "red";
+						}
+						responseMessage.textContent = data.message;
+						
+						if (!data.message.includes("fel")) {
+							form.reset(); 
+						}
+					})
+					.catch(error => {
+						responseMessage.style.display = "block";
+						responseMessage.style.borderColor = "red";
+						responseMessage.textContent = "Ett fel uppstod. Försök igen!";
+					});
+				});
 			});
 		</script>
 	</body>

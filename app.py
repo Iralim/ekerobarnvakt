@@ -34,6 +34,8 @@ def boka_barnvakt():
 
         try:
             recaptcha_result = requests.post(verify_url, data=payload, timeout=5).json()
+            print(f"Using RECAPTCHA_SECRET_KEY: {RECAPTCHA_SECRET_KEY}")
+            print(f"Received reCAPTCHA response: {recaptcha_response}")
             if not recaptcha_result.get("success"):
                 return jsonify({"message": "reCAPTCHA-verifiering misslyckades!"}), 400
         except requests.exceptions.RequestException as e:

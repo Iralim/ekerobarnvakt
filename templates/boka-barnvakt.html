@@ -342,14 +342,17 @@
 														<ul></ul>
 													</div>
 													<form id="orderForm" action="{{ url_for('boka_barnvakt') }}" aria-label="Kontaktformulär" class="wpcf7-form init" data-status="init" method="post" novalidate="novalidate">
+														<input type="hidden" name="csrf_token" value="{{ csrf_token()}}">
 														<p><span class="wpcf7-form-control-wrap" data-name="text-726"><input aria-invalid="false" aria-required="true" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" maxlength="400" name="name" placeholder="Namn och efternamn" size="40" type="text" value=""/></span><br/>
 															<span class="wpcf7-form-control-wrap" data-name="text-952"><input aria-invalid="false" aria-required="true" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" maxlength="400" name="phone" placeholder="Telefonnummer" size="40" type="text" value=""/></span><br/>
 															<span class="wpcf7-form-control-wrap" data-name="email-494"><input aria-invalid="false" aria-required="true" class="wpcf7-form-control wpcf7-email wpcf7-validates-as-required wpcf7-text wpcf7-validates-as-email" maxlength="400" name="email" placeholder="E-post" size="40" type="email" value=""/></span><br/>
 															<span class="wpcf7-form-control-wrap" data-name="textarea-595"><textarea aria-invalid="false" class="wpcf7-form-control wpcf7-textarea" cols="40" maxlength="2000" name="description" placeholder="Beskriv gärna dina önskemål" rows="10"></textarea></span>
 														</p>
+														<div class="g-recaptcha" data-sitekey="6LfLc9wqAAAAAPm1afgFdXXWfGMMI5naxhpiD1rH"></div>
 														<p><input class="wpcf7-form-control wpcf7-submit has-spinner" type="submit" value="Boka barnvakt / pedagog"/></p>
 														<div aria-hidden="true" class="wpcf7-response-output"></div>
 													</form>
+													<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 													<div id="responseMessage" style="display: none;"></div>
 												</div>
 												</p>

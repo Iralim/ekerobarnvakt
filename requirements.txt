@@ -4,5 +4,6 @@ Flask-Mail==0.10.0
 python-dotenv==1.0.1
 flask-wtf
 requests
+flask-limiter
 
 
